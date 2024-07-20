@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { TextToSpeechClient } from '@google-cloud/text-to-speech';
 
-const googleCredentials = process.env.GOOGLE_CLOUD_CREDENTIALS
+const googleCredentials = process.env.GOOGLE_CLOUD_CREDENTIALS;
 
 const client = new TextToSpeechClient({
   projectId: process.env.GOOGLE_CLOUD_PROJECT,
