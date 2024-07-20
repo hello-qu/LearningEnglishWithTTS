@@ -1,19 +1,13 @@
+import client from "../TTSClient";
 import { NextResponse } from 'next/server';
-import { TextToSpeechClient } from '@google-cloud/text-to-speech';
-
-const googleCredentials = JSON.parse(process.env.GOOGLE_CLOUD_CREDENTIALS);
-
-const client = new TextToSpeechClient({
-  projectId: process.env.GOOGLE_CLOUD_PROJECT,
-  credentials: googleCredentials
-});
 
 export async function POST(request) {
-  const { text } = await request.json();
-
+  let { text, voice:{languageCodes, name, ssmlGender} } = await request.json();
+  let languageCode = languageCodes[0];
+  console.log(languageCode, name, ssmlGender)
   const synthRequest = {
-    input: { text: text },
-    voice: { languageCode: 'en-US', name: 'en-US-Neural2-F', ssmlGender: 'FEMALE' },
+    input: { text},
+    voice: { languageCode, name, ssmlGender },
     audioConfig: { audioEncoding: 'MP3', speakingRate: 0.9 },
   };
 
