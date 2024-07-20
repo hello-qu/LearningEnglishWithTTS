@@ -1,7 +1,12 @@
 import { NextResponse } from 'next/server';
 import { TextToSpeechClient } from '@google-cloud/text-to-speech';
 
-const client = new TextToSpeechClient();
+const googleCredentials = JSON.parse(process.env.GOOGLE_CLOUD_CREDENTIALS);
+
+const client = new TextToSpeechClient({
+  projectId: process.env.GOOGLE_CLOUD_PROJECT,
+  credentials: googleCredentials
+});
 
 export async function POST(request) {
   const { text } = await request.json();
