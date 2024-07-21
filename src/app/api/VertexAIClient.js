@@ -2,14 +2,7 @@ import { VertexAI } from '@google-cloud/vertexai'
 import { GoogleAuth } from 'google-auth-library';
 // Initialize Vertex with your Cloud project and location
 
-const auth = new GoogleAuth({
-  keyFilename: process.env.GOOGLE_CLOUD_CREDENTIALS, // 指向服务账号密钥文件的路径
-  scopes: 'https://www.googleapis.com/auth/cloud-platform',
-});
-
-
 const vertex_ai = new VertexAI ({
-  auth,
   project: 'quick-yen-427321-c7',
   location: 'us-central1',
 });
