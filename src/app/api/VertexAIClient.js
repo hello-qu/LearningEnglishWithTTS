@@ -1,7 +1,17 @@
-const {VertexAI} = require('@google-cloud/vertexai');
-
+import { VertexAI } from '@google-cloud/vertexai'
+import { GoogleAuth } from 'google-auth-library';
 // Initialize Vertex with your Cloud project and location
-const vertex_ai = new VertexAI({project: 'quick-yen-427321-c7', location: 'us-central1'});
+
+const auth = new GoogleAuth({
+  keyFilename: process.env.GOOGLE_CLOUD_CREDENTIALS, // 指向服务账号密钥文件的路径
+  scopes: 'https://www.googleapis.com/auth/cloud-platform',
+});
+
+
+const vertex_ai = new VertexAI ({
+  project: 'quick-yen-427321-c7',
+  location: 'us-central1',
+});
 const model = 'gemini-1.5-flash-001';
 
 const generativeModel = vertex_ai.preview.getGenerativeModel({
