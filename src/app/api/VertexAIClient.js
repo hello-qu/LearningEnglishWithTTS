@@ -9,6 +9,7 @@ const auth = new GoogleAuth({
 
 
 const vertex_ai = new VertexAI ({
+  auth,
   project: 'quick-yen-427321-c7',
   location: 'us-central1',
 });
