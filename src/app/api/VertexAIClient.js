@@ -1,10 +1,13 @@
 import { VertexAI } from '@google-cloud/vertexai'
-import { GoogleAuth } from 'google-auth-library';
-// Initialize Vertex with your Cloud project and location
+
+const authOptions = {
+  credentials: JSON.parse(process.env.GOOGLE_CLOUD_CREDENTIALS)
+};
 
 const vertex_ai = new VertexAI ({
   project: 'quick-yen-427321-c7',
   location: 'us-central1',
+  googleAuthOptions: authOptions
 });
 const model = 'gemini-1.5-flash-001';
 
