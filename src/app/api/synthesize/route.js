@@ -4,7 +4,7 @@ import { NextResponse } from 'next/server';
 export async function POST(request) {
   let { text, voice:{languageCodes, name, ssmlGender} } = await request.json();
   let languageCode = languageCodes[0];
-  console.log(languageCode, name, ssmlGender)
+
   const synthRequest = {
     input: { text},
     voice: { languageCode, name, ssmlGender },
