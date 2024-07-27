@@ -1,5 +1,6 @@
 "use client";
 import {useEffect, useRef, useState} from 'react';
+import { Button, Switch, Select } from '@headlessui/react'
 
 const defaultVoice = [
   {
@@ -12,45 +13,41 @@ const defaultVoice = [
   }
 ]
 
-const languageCodesList = [
-  "af-ZA", "ar-XA", "bg-BG", "bn-IN", "ca-ES", "cs-CZ", "da-DK", "de-DE",
-  "el-GR", "en-AU", "en-GB", "en-IE", "en-IN", "en-US", "es-ES", "es-US",
-  "et-EE", "fi-FI", "fil-PH", "fr-CA", "fr-FR", "gu-IN", "hi-IN", "hr-HR",
-  "hu-HU", "id-ID", "is-IS", "it-IT", "iw-IL", "ja-JP", "jw-ID", "km-KH",
-  "ko-KR", "la", "lv-LV", "ml-IN", "mr-IN", "ms-MY", "my-MM", "nb-NO",
-  "nl-NL", "pl-PL", "pt-BR", "pt-PT", "ro-RO", "ru-RU", "si-LK", "sk-SK",
-  "sl-SI", "sr-RS", "su-ID", "sv-SE", "sw-KE", "ta-IN", "ta-LK", "th-TH",
-  "tr-TR", "uk-UA", "ur-IN", "ur-PK", "vi-VN", "yue-HK", "zh-CN", "zh-HK",
-  "zh-TW", "zu-ZA"
-]
+const languageCodesList = ["en-US", "en-GB", "cmn-CN", "cmn-TW", "yue-HK"]
 
 
 const GeneratorVoice = () => {
+  const [ssmlGender, setSsmlGender] = useState('FEMALE');
+  const [languageCode, setLanguageCode] = useState('en-US');
   const [text, setText] = useState('');
   const [audioUrl, setAudioUrl] = useState('');
   const [voiceList, setVoiceList] = useState(defaultVoice);
   let currentVoiceRef = useRef(defaultVoice[0]);
   const [translateResult, setTranslateResult] = useState('')
+  async function GenerateVoiceList() {
+    return await fetch('/api/voiceList', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ssmlGender, languageCode}),
+    });
+  }
 
-  useEffect(() => {
-    async function GenerateVoiceList() {
-      return await fetch('/api/voiceList', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({}),
-      });
-    }
-
+  const handleVoiceList = () => {
     GenerateVoiceList()
       .then(data => {
         return data.json();
       })
       .then(list => {
+        list.voices = list.voices.filter(voice => voice.ssmlGender === ssmlGender)
         setVoiceList(list.voices)
       });
-  }, []);
+  }
+
+  useEffect(() => {
+    handleVoiceList()
+  }, [languageCode, ssmlGender]);
 
 
   const handleGenerateVoice = async () => {
@@ -74,7 +71,7 @@ const GeneratorVoice = () => {
     setAudioUrl(url);
   };
 
-  const handleTranslate =  async  () => {
+  const handleTranslate = async () => {
     const translateResult = await fetch('/api/vertexAI', {
       method: 'POST',
       headers: {
@@ -83,7 +80,9 @@ const GeneratorVoice = () => {
       body: JSON.stringify({text}),
     });
     const data = await translateResult.json();
-    const result =data.result.candidates[0].content.parts[0].text
+    const response = data.result.candidates[0].content.parts[0].text
+    const cleanedResponse = response.replace(/^```json|```$|\n/g, '');
+    const result = JSON.parse(cleanedResponse);
     setTranslateResult(result);
 
   }
@@ -92,46 +91,77 @@ const GeneratorVoice = () => {
     currentVoiceRef.current = voiceList[target.selectedIndex]
   }
 
+  const handleSetSex = (e) => {
+    setSsmlGender(e ? 'FEMALE':'MALE');
+  }
+
+  const handleLanguageCode = (e) => {
+    setLanguageCode(e.target.value)
+  }
+
   return (
 
     <div className="flex h-full w-full justify-center ">
-    <div>
-      <div className="flex mb-8">
-        <div className="mr-4">
-          <input type="radio" name="sex" value="MALE"/>
-          <label>MALE</label>
-          <input type="radio" name="sex" value="FEMALE"/>
-          <label>FEMALE</label>
-        </div>
-        <select defaultValue="en-US" className="mr-4">
-          {languageCodesList.map((language) => (
-            <option key={language} value={language}>{language}</option>
-          ))}
-        </select>
+      <div className="mr-4">
+        <div className="flex mb-8">
+          <div className="mr-4">
+            <Switch
+              onChange={(e) => handleSetSex(e)}
+              checked={ssmlGender === 'FEMALE'}
+              className="group relative flex h-7 w-14 cursor-pointer rounded-full bg-white/10 p-1 transition-colors duration-200 ease-in-out focus:outline-none data-[focus]:outline-1 data-[focus]:outline-white data-[checked]:bg-sky-700">
+              <span
+                aria-hidden="true"
+                className="pointer-events-none inline-block size-5 translate-x-0 rounded-full bg-white ring-0 shadow-lg transition duration-200 ease-in-out group-data-[checked]:translate-x-7"
+              />
+            </Switch>
+          </div>
+          <Select onChange={handleLanguageCode} value={languageCode} className=" mr-4">
+            {languageCodesList.map((language) => (
+              <option key={language} value={language}>{language}</option>
+            ))}
+          </Select>
 
-        <select
-          onChange={e => handleSetVoice(e.target)}
-          defaultValue={currentVoiceRef.current.name}>
-          {voiceList.map((voice) => (
-            <option
-              key={voice.name}
-              value={voice.name}>
-              {voice.name}
-            </option>
-          ))}
-        </select>
+          <Select
+            className=""
+            onChange={e => handleSetVoice(e.target)}
+            defaultValue={currentVoiceRef.current.name}>
+            {voiceList.map((voice) => (
+              <option
+                key={voice.name}
+                value={voice.name}>
+                {voice.name}
+              </option>
+            ))}
+          </Select>
+        </div>
+        <textarea
+          value={text} onChange={(e) => setText(e.target.value)}
+          className="w-full outline-0 p-4 rounded-md  border-0" cols="30" rows="10"></textarea>
+        <Button className="rounded bg-sky-600 py-2 px-4 text-sm text-white data-[hover]:bg-sky-500 data-[active]:bg-sky-700 mr-4" onClick={handleGenerateVoice}>TTS 语音生成</Button>
+        <Button className="rounded bg-sky-600 py-2 px-4 text-sm text-white data-[hover]:bg-sky-500 data-[active]:bg-sky-700" onClick={handleTranslate}>AI 翻译</Button>
+        {audioUrl && <audio src={audioUrl} controls/>}
       </div>
-      <textarea
-        value={text} onChange={(e) => setText(e.target.value)}
-        className="w-full outline-0 p-4 rounded-md  border-0" cols="30" rows="10"></textarea>
-      <button onClick={handleGenerateVoice}>TTS 语音生成</button>
-      <button onClick={handleTranslate}>AI 翻译</button>
-      {audioUrl && <audio src={audioUrl} controls/>}
-    </div>
       <div className=" rounded-md w-1/2 h-full bg-white ">
         <h2>翻译结果</h2>
         <div>
-          {translateResult}
+          {translateResult.translation}
+        </div>
+        <h2>词汇解释</h2>
+        <div>
+          {
+            translateResult.keyWords?.map((keyword) => (
+              <div>
+                <li>{keyword.word}：{keyword.explain}</li>
+                <ul>{keyword.sentences?.map(sentence => (
+                  <>
+                    <li>{sentence.sentence}</li>
+                    <li>{sentence.translate}</li>
+                  </>
+                ))}</ul>
+              </div>
+
+            ))
+          }
         </div>
       </div>
     </div>

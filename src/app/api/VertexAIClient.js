@@ -1,8 +1,11 @@
 import { VertexAI } from '@google-cloud/vertexai'
 
-const authOptions = {
-  credentials: JSON.parse(process.env.GOOGLE_CLOUD_CREDENTIALS)
-};
+let authOptions = {}
+if(process.env.NODE_ENV !== 'development') {
+  authOptions = {
+    credentials: JSON.parse(process.env.GOOGLE_CLOUD_CREDENTIALS)
+  };
+}
 
 const vertex_ai = new VertexAI ({
   project: 'quick-yen-427321-c7',
@@ -47,7 +50,7 @@ export default async function generateContent(text) {
   const streamingResp = await generativeModel.generateContentStream(req);
 
   for await (const item of streamingResp.stream) {
-    process.stdout.write('stream chunk: ' + JSON.stringify(item) + '\n');
+    // process.stdout.write('stream chunk: ' + JSON.stringify(item) + '\n');
   }
 
   return await streamingResp.response;
