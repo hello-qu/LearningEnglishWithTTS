@@ -1,6 +1,8 @@
 "use client";
-import {useEffect, useRef, useState} from 'react';
+import {useEffect, useRef, useState, useMemo,useCallback} from 'react';
 import { Button, Switch, Select } from '@headlessui/react'
+import {useWavesurfer} from '@wavesurfer/react'
+import Timeline from 'wavesurfer.js/dist/plugins/timeline.esm.js'
 
 const defaultVoice = [
   {
@@ -22,6 +24,8 @@ const GeneratorVoice = () => {
   const [text, setText] = useState('');
   const [audioUrl, setAudioUrl] = useState('');
   const [voiceList, setVoiceList] = useState(defaultVoice);
+  const audioWaveRef = useRef(null);
+  const audioRef = useRef(null)
   let currentVoiceRef = useRef(defaultVoice[0]);
   const [translateResult, setTranslateResult] = useState('')
   async function GenerateVoiceList() {
@@ -33,6 +37,28 @@ const GeneratorVoice = () => {
       body: JSON.stringify({ssmlGender, languageCode}),
     });
   }
+
+  const { wavesurfer, isPlaying, currentTime } = useWavesurfer({
+    container: audioWaveRef,
+    height: 100,
+    waveColor: '	#1aa4b8',
+    progressColor: '#1a84b8',
+    url: audioUrl,
+    barWidth: 2,
+    barGap: 1,
+    barRadius: 2,
+    media:audioRef.current,
+    plugins: useMemo(() => [Timeline.create()], []),
+  })
+
+  wavesurfer && wavesurfer.on('click', () => {
+    wavesurfer.play()
+  })
+  
+  wavesurfer && wavesurfer.on('dblclick', () => {
+    wavesurfer.pause()
+  })
+  
 
   const handleVoiceList = () => {
     GenerateVoiceList()
@@ -102,7 +128,7 @@ const GeneratorVoice = () => {
   return (
 
     <div className="flex h-full w-full justify-center ">
-      <div className="mr-4">
+      <div className="mr-4 w-2/5">
         <div className="flex mb-8">
           <div className="mr-4">
             <Switch
@@ -137,9 +163,12 @@ const GeneratorVoice = () => {
         <textarea
           value={text} onChange={(e) => setText(e.target.value)}
           className="w-full outline-0 p-4 rounded-md  border-0" cols="30" rows="10"></textarea>
+        <div>
+          <div ref={audioWaveRef}></div>
+          {<audio ref={audioRef} className='w-full mt-2 bg-transparent' src={audioUrl} controls/>}
+        </div>
         <Button className="rounded bg-sky-600 py-2 px-4 text-sm text-white data-[hover]:bg-sky-500 data-[active]:bg-sky-700 mr-4" onClick={handleGenerateVoice}>TTS 语音生成</Button>
         <Button className="rounded bg-sky-600 py-2 px-4 text-sm text-white data-[hover]:bg-sky-500 data-[active]:bg-sky-700" onClick={handleTranslate}>AI 翻译</Button>
-        {audioUrl && <audio src={audioUrl} controls/>}
       </div>
       <div className=" rounded-md w-1/2 h-full bg-white ">
         <h2>翻译结果</h2>
@@ -150,6 +179,7 @@ const GeneratorVoice = () => {
         <div>
           {
             translateResult.keyWords?.map((keyword) => (
+              // eslint-disable-next-line react/jsx-key
               <div>
                 <li>{keyword.word}：{keyword.explain}</li>
                 <ul>{keyword.sentences?.map(sentence => (
