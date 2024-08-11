@@ -73,6 +73,7 @@ const GeneratorVoice = () => {
 
   useEffect(() => {
     handleVoiceList()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [languageCode, ssmlGender]);
 
 
