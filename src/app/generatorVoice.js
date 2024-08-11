@@ -2,7 +2,6 @@
 import {useEffect, useRef, useState, useMemo,useCallback} from 'react';
 import { Button, Switch, Select } from '@headlessui/react'
 import {useWavesurfer} from '@wavesurfer/react'
-import Timeline from 'wavesurfer.js/dist/plugins/timeline.esm.js'
 
 const defaultVoice = [
   {
@@ -48,7 +47,8 @@ const GeneratorVoice = () => {
     barGap: 1,
     barRadius: 2,
     media:audioRef.current,
-    plugins: useMemo(() => [Timeline.create()], []),
+    // plugins: useMemo(() => [Timeline.create()], []), 
+    //此处会引起 next 构建报错 ReferenceError: document is not defined
   })
 
   wavesurfer && wavesurfer.on('click', () => {
