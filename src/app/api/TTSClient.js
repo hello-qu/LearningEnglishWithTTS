@@ -25,7 +25,7 @@ class SiliconFlowTTSClient {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      return await response
+      return response
     } catch (error) {
       console.error('Error in TTS synthesis:', error);
       throw error;
