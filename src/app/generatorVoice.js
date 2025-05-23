@@ -66,10 +66,6 @@ const GeneratorVoice = () => {
       });
   };
 
-  useEffect(() => {
-    handleVoiceList();
-  }, [languageCode, ssmlGender]);
-
   const handleGenerateVoice = async () => {
     const ttsResult = await fetch('/api/synthesize', {
       method: 'POST',
@@ -84,20 +80,6 @@ const GeneratorVoice = () => {
     setAudioUrl(url);
   };
 
-  const handleTranslate = async () => {
-    const translateResult = await fetch('/api/vertexAI', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ text }),
-    });
-    const data = await translateResult.json();
-    const response = data.result.candidates[0].content.parts[0].text;
-    const cleanedResponse = response.replace(/^```json|```$|\n/g, '');
-    const result = JSON.parse(cleanedResponse);
-    setTranslateResult(result);
-  };
 
   const handleSetVoice = (value) => {
     const found = voiceList.find(v => v.name === value);
@@ -182,7 +164,6 @@ const GeneratorVoice = () => {
                   TTS 语音生成
                 </Button>
                 <Button
-                  onClick={handleTranslate}
                   className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition duration-300 ease-in-out transform hover:scale-105"
                 >
                   AI 翻译

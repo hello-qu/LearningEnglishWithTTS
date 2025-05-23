@@ -1,4 +1,3 @@
-import VertexAI from '../VertexAIClient'
 
 import { NextResponse } from 'next/server';
 
@@ -42,8 +41,7 @@ export async function POST(request) {
   }
   `
   try {
-    const result = await VertexAI(prompt);
-    return NextResponse.json({ result });
+    return NextResponse.json({ result:"hello world" });
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
