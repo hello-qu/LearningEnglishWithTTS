@@ -84,17 +84,17 @@ const GeneratorVoice = () => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        text,
-        voice: currentVoiceRef.current
+        text
       }),
     });
 
-    const data = await ttsResult.json();
-    const audioContent = data.audioContent;
+    const audioContent = await ttsResult.arrayBuffer()
 
     // Create a URL for the audio content
     const audioBlob = new Blob([new Uint8Array(Buffer.from(audioContent, 'base64'))], {type: 'audio/mp3'});
     const url = URL.createObjectURL(audioBlob);
+    console.log({url});
+    
     setAudioUrl(url);
   };
 

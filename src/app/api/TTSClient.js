@@ -1,14 +1,38 @@
+class SiliconFlowTTSClient {
 
-import { TextToSpeechClient } from '@google-cloud/text-to-speech';
+  async synthesizeSpeech(text, voice = 'FunAudioLLM/CosyVoice2-0.5B:alex') {
+    const options = {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${process.env.SILICONFLOW_TOKEN}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        model: 'FunAudioLLM/CosyVoice2-0.5B',
+        input: text,
+        voice: voice,
+        response_format: 'mp3',
+        sample_rate: 32000,
+        stream: true,
+        speed: 1,
+        gain: 0
+      })
+    };
 
-let opts = {};
-if(process.env.NODE_ENV !== 'development') {
-  const googleCredentials = JSON.parse(process.env.GOOGLE_CLOUD_CREDENTIALS);
-  opts = {
-    projectId: process.env.GOOGLE_CLOUD_PROJECT,
-    credentials: googleCredentials
+    try {
+      const response = await fetch(
+        `https://api.siliconflow.cn/v1/audio/speech`, options);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return await response
+    } catch (error) {
+      console.error('Error in TTS synthesis:', error);
+      throw error;
+    }
   }
 }
-const client = new TextToSpeechClient(opts);
 
-export default client
+const client = new SiliconFlowTTSClient();
+
+export default client;
